@@ -29,7 +29,7 @@ object Comps{
             return;
         }
 
-        if(msg.startsWith("背单词")){
+        if(msg.startsWith("/背单词")){
             // 背单词 <book> <times>
             if(comp.state == STATE_RUNNING)
                 return;
@@ -40,7 +40,7 @@ object Comps{
                 comp.set(msg, groupnum)
                 comp.sendMsg()
             }
-        } else if(msg == "开始"){
+        } else if(msg == "/开始"){
             if(comp.state == STATE_SLEEP){
                 comp.msg += "还未完成设置，请通过\"背单词 <book> <times>\"命令完成设置"
                 comp.sendMsg()

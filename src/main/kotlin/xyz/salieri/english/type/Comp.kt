@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.event.*
 import xyz.salieri.mirai.plugin.EnglishUserData
+import kotlin.random.Random
 
 val STATE_SLEEP = 0             // 等待设置
 val STATE_READY = 1             // 等待启动
@@ -94,9 +95,24 @@ class Comp(number: Long){
     suspend fun run(){
         this.state = STATE_RUNNING
         val chan = GlobalEventChannel.filter{ it is GroupMessageEvent && it.group.id == this.groupnum } // 本群消息的信道
+        val easy = EnglishUserData.easy.getValue(this.book)
+        val hard = EnglishUserData.hard.getValue(this.book)
         while( this.quesindex <= quesnum ) {
             // 产生随机一道题目，打印信息
-            val obj: Word = randomword(this.book)
+            val obj: Word
+            var hardLevel: Int = 1
+            if (Random.nextInt(0, 100) < hard.size * 3) {
+                obj = hard.keys.random()
+            } else {
+                fun temp(): Word {
+                    var ret = randomword(this.book)
+                    while(easy.contains(ret) && Random.nextInt(0, 100) < 50) {
+                        ret = randomword(this.book)
+                    }
+                    return ret
+                }
+                obj = temp()
+            }
             this.msg = wordToQuestion(this.quesindex,this.quesnum,obj,this.timelim)
             this.sendMsg()
             // 建立【带超时的监听】，分别是5s（提示第一个字母），5s（提示前三个字母），10s
@@ -109,6 +125,7 @@ class Comp(number: Long){
             }
             var objEvent: GroupMessageEvent? = listenFor(5000L, obj.word)
             if(objEvent == null){
+                ++hardLevel
                 // 第一个提示
                 // 给出第一个字母
                 msg += "5s内没人猜出来哦，给你们个小提示\n"
@@ -116,6 +133,7 @@ class Comp(number: Long){
                 this.sendMsg()
                 objEvent = listenFor(5000, obj.word)
                 if(objEvent == null){
+                    ++hardLevel
                     // 第二个提示，当单词长度大于3才给，给出第二个字母
                     if (obj.word.length > 3){
                         msg += "10s内没人猜出来啦，再给你们个提示\n"
@@ -126,6 +144,21 @@ class Comp(number: Long){
                 }
             }
 
+            if (hardLevel == 1) {
+                if (hard.contains(obj)) {
+                    if (hard[obj]!! < 2) {
+                        hard.remove(obj)
+                    } else {
+                        hard[obj] = hard[obj]!!.minus(2)
+                    }
+                } else {
+                    easy.add(obj)
+                }
+            } else {
+                easy.remove(obj)
+                hard[obj] =
+                    hard.getValue(obj) + hardLevel + if (objEvent == null) 1 else 0
+            }
             if(objEvent == null) {
                 // 没有人回答出来
                 msg += "时间到，很可惜没有人答对。\n"

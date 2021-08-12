@@ -3,6 +3,7 @@ package xyz.salieri.mirai.plugin
 import net.mamoe.mirai.console.command.CommandSenderOnMessage
 import net.mamoe.mirai.console.data.*
 import net.mamoe.mirai.console.data.PluginDataExtensions.withDefault
+import xyz.salieri.english.type.Word
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -11,6 +12,8 @@ var CommandSenderOnMessage<*>.coin: Int by EnglishUserData.sender()
 object EnglishUserData : AutoSavePluginData("user"){
     @ValueDescription("Key 是QQ号，Value是coin数值")
     var coin by value<MutableMap<Long, Int>>().withDefault { 0 }
+    var easy by value<MutableMap<String, MutableSet<Word>>>().withDefault { mutableSetOf() }
+    var hard by value<MutableMap<String, MutableMap<Word, Int>>>().withDefault { mutableMapOf<Word, Int>().withDefault { 0 } }
 }
 
 fun <T, K, V> AbstractPluginData.delegate(key: T.() -> K) = object : ReadWriteProperty<T, V> {
