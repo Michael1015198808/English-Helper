@@ -86,7 +86,7 @@ class Comp(number: Long){
         单词书为：${this.book}
         题目数为：${this.quesnum}
         时间限制：${this.timelim / 1000}
-        请输入"开始"启动竞赛！""".trimIndent()
+        请输入"/开始"启动竞赛！""".trimIndent()
     }
 
 
