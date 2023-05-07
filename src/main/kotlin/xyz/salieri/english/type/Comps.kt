@@ -1,6 +1,9 @@
 package xyz.salieri.english.type
 
-object Comps{
+import net.mamoe.mirai.console.command.ConsoleCommandOwner.permissionId
+import net.mamoe.mirai.console.permission.PermissionService
+
+object Comps {
     val comps: MutableList<Comp> = mutableListOf()              // 组织所有群的comp
     fun getComp(groupnum: Long): Int{                           // 判断群groupnum是否有comp
         return this.comps.indexOfFirst{it.groupnum == groupnum}
@@ -18,6 +21,9 @@ object Comps{
         }
     }
 
+    val BasePermission by lazy { // Lazy: Lazy 是必须的, console 不允许提前访问权限系统
+        PermissionService.INSTANCE.register(permissionId("Base"), "启动单词比赛之权限")
+    }
 
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun mainlogic(groupnum: Long, sender: Long, msginput: String){

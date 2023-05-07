@@ -2,12 +2,17 @@ package xyz.salieri.mirai.plugin
 
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
+import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
+import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.GlobalEventChannel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.utils.info
 import xyz.salieri.english.type.Comps
+import xyz.salieri.english.type.STATE_RUNNING
+import xyz.salieri.english.type.STATE_SLEEP
+import xyz.salieri.english.type.STATE_STOP
 import xyz.salieri.mirai.plugin.command.EnglishInfoCommand
 import xyz.salieri.mirai.plugin.command.EnglishRandCommand
 
@@ -34,7 +39,9 @@ object EnglishHelperPlugin : KotlinPlugin(
         eventChannel.subscribeAlways<GroupMessageEvent> {
             if(xyz.salieri.mirai.plugin.bot == null)
                 xyz.salieri.mirai.plugin.bot = bot
-            Comps.mainlogic(group.id, sender.id, message.contentToString())
+            if (this.group.permitteeId.hasPermission(Comps.BasePermission)) {
+                Comps.mainlogic(group.id, sender.id, message.contentToString())
+            }
         }
     }
 
